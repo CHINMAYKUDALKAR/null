@@ -1,65 +1,48 @@
-# !pip install spacy nltk
-# !python -m spacy download en_core_web_sm
+!pip install spacy nltk
+!python -m spacy download en_core_web_sm
 
 import spacy
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 
-# Download NLTK resources (only first time)
 nltk.download("punkt")
 nltk.download("stopwords")
 
-# Load spaCy model
 nlp = spacy.load("en_core_web_sm")
 
-# Long example paragraph
 text = """Artificial Intelligence (AI) and Natural Language Processing (NLP) are transforming the way humans interact with machines.
 From chatbots that provide customer support to recommendation systems that suggest movies and products, NLP plays a key role in modern technology.
 It helps computers analyze text, extract meaning, and even generate human-like responses.
 However, one of the biggest challenges in NLP is understanding context and handling ambiguity, since words can have multiple meanings depending on how they are used in a sentence.
 Researchers are working on advanced algorithms and deep learning models to overcome these issues, making NLP applications more accurate, reliable, and useful in everyday life."""
 
-# -----------------------------
-# 1️⃣ Using NLTK
-# -----------------------------
 print("\n=== NLTK Results ===")
 
-# Sentence Tokenization
 print("\nSentence Tokenization (NLTK):")
 print(sent_tokenize(text))
 
-# Word Tokenization
 nltk_tokens = word_tokenize(text)
 print("\nWord Tokenization (NLTK):")
 print(nltk_tokens)
 
-# Stopword Removal
 stop_words = set(stopwords.words("english"))
 nltk_filtered = [word for word in nltk_tokens if word.lower() not in stop_words and word.isalpha()]
 print("\nStopword Removal (NLTK):")
 print(nltk_filtered)
 
-
-# -----------------------------
-# 2️⃣ Using spaCy
-# -----------------------------
 print("\n=== spaCy Results ===")
 
-# Process text
 doc = nlp(text)
 
-# Sentence Tokenization
 print("\nSentence Tokenization (spaCy):")
 for sent in doc.sents:
     print(sent.text)
 
-# Word Tokenization
 spacy_tokens = [token.text for token in doc]
 print("\nWord Tokenization (spaCy):")
 print(spacy_tokens)
 
-# Stopword Removal
 spacy_filtered = [token.text for token in doc if not token.is_stop]
 print("\nStopword Removal (spaCy):")
 print(spacy_filtered)
