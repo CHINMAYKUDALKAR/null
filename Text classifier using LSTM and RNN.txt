@@ -1,0 +1,56 @@
+import warnings
+warnings.filterwarnings("ignore")
+import numpy as np
+import bz2
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, LSTM, SimpleRNN, Dense
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from sklearn.preprocessing import LabelEncoder
+
+# Load Amazon reviews dataset
+texts, labels = [], []
+with bz2.open("/content/drive/MyDrive/data/amazonProductReviews/train.ft.txt.bz2", 'rt') as f:
+    for i, line in enumerate(f):
+        if i >= 5000: break  # Use 5k samples
+        parts = line.strip().split(' ', 1)
+        if len(parts) == 2:
+            labels.append('positive' if parts[0] == '__label__2' else 'negative')
+            texts.append(parts[1])
+
+print(f"Loaded {len(texts)} Amazon reviews")
+
+# Preprocessing
+tokenizer = Tokenizer(num_words=5000)
+tokenizer.fit_on_texts(texts)
+X = pad_sequences(tokenizer.texts_to_sequences(texts), maxlen=100)
+y = LabelEncoder().fit_transform(labels)
+
+# Models
+models = {
+    'LSTM': Sequential([
+        Embedding(5000, 64, input_length=100),
+        LSTM(32),
+        Dense(1, activation='sigmoid')
+    ]),
+    'RNN': Sequential([
+        Embedding(5000, 64, input_length=100),
+        SimpleRNN(32),
+        Dense(1, activation='sigmoid')
+    ])
+}
+
+# Train and evaluate
+for name, model in models.items():
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.fit(X, y, epochs=3, batch_size=64, verbose=0)
+    acc = model.evaluate(X, y, verbose=0)[1]
+    print(f"{name}: {acc:.3f}")
+
+# Test prediction
+test_text = ["This product is amazing!", "Terrible quality, hate it"]
+test_seq = pad_sequences(tokenizer.texts_to_sequences(test_text), maxlen=100)
+for name, model in models.items():
+    pred = model.predict(test_seq, verbose=0)
+    print(f"{name}: {['negative' if p < 0.5 else 'positive' for p in pred.flatten()]}")

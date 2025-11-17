@@ -1,0 +1,20 @@
+!pip install -q gradio transformers
+
+import gradio as gr
+from transformers import pipeline
+
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+
+def summarize_text(text):
+    if len(text.split()) < 30:
+        return "Text too short. Please provide at least 30 words."
+    summary = summarizer(text, max_length=130, min_length=30, do_sample=False)
+    return summary[0]['summary_text']
+
+demo = gr.Interface(
+    fn=summarize_text,
+    inputs=gr.Textbox(label="Enter text to summarize", lines=10, placeholder="Paste your text here..."),
+    outputs=gr.Textbox(label="Summary", lines=8),
+    title="📝 Text Summarizer"
+)
+demo.launch(debug=True)

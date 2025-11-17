@@ -1,0 +1,21 @@
+import speech_recognition as sr
+
+# Initialize recognizer
+recognizer = sr.Recognizer()
+
+# Load the audio file
+audio_file = "/content/drive/MyDrive/data/speech/harvard.wav"
+
+with sr.AudioFile(audio_file) as source:
+    print("🔊 Reading audio file...")
+    recognizer.adjust_for_ambient_noise(source)  # optional for pre-recorded
+    audio = recognizer.record(source)  # record the entire audio file
+
+# Recognize speech using Google API
+try:
+    text = recognizer.recognize_google(audio)
+    print("📝 You said:", text)
+except sr.UnknownValueError:
+    print("❌ Could not understand audio")
+except sr.RequestError:
+    print("❌ Could not request results from Google Speech API")

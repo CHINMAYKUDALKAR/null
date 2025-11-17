@@ -1,0 +1,36 @@
+!pip install nltk spacy
+!python -m spacy download en_core_web_sm
+
+import nltk
+from nltk import word_tokenize, pos_tag, ne_chunk
+import spacy
+
+nltk.download("punkt")
+nltk.download("words")
+nltk.download("averaged_perceptron_tagger")
+nltk.download("averaged_perceptron_tagger_eng")
+nltk.download("maxent_ne_chunker")
+nltk.download("maxent_ne_chunker_tab")
+
+text = """Apple Inc. is looking at buying a UK-based startup for $1 billion.
+Tim Cook, the CEO of Apple, met with the company’s founders in London last week.
+The deal is expected to boost Apple’s artificial intelligence capabilities significantly."""
+
+print("---- NLTK Results ----")
+tokens = word_tokenize(text)
+pos_tags = pos_tag(tokens)
+print("POS Tags:", pos_tags)
+
+ner_tree = ne_chunk(pos_tags)
+print("\nNamed Entities (NLTK):")
+print(ner_tree)
+
+print("\n---- spaCy Results ----")
+nlp = spacy.load("en_core_web_sm")
+doc = nlp(text)
+
+print("POS Tags:", [(token.text, token.pos_) for token in doc])
+
+print("\nNamed Entities (spaCy):")
+for ent in doc.ents:
+    print(ent.text, ent.label_)

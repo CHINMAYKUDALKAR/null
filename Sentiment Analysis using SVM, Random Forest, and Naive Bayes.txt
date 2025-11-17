@@ -1,0 +1,45 @@
+!pip install pandas scikit-learn
+
+import pandas as pd
+import re
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import LinearSVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+file_path = "/content/drive/MyDrive/data/SentimentAnalysisTwitter/sentimentAnalysisTwitter.csv"
+df = pd.read_csv(file_path, encoding="latin-1")
+df = df[["Text", "Sentiment"]].dropna()
+
+def clean_text(text):
+    text = str(text).lower()
+    text = re.sub(r"http\S+", "", text)
+    text = re.sub(r"@\w+", "", text)
+    text = re.sub(r"#\w+", "", text)
+    text = re.sub(r"[^a-z\s]", "", text)
+    return text.strip()
+
+df["Text"] = df["Text"].apply(clean_text)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    df["Text"], df["Sentiment"], test_size=0.2, random_state=42
+)
+
+vectorizer = TfidfVectorizer(max_features=5000, stop_words="english")
+X_train = vectorizer.fit_transform(X_train)
+X_test = vectorizer.transform(X_test)
+
+models = {
+    "Naive Bayes": MultinomialNB(),
+    "SVM": LinearSVC(),
+    "Random Forest": RandomForestClassifier(n_estimators=200, random_state=42)
+}
+
+print("Model Performance (Train vs Test Accuracy):\n")
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    train_acc = accuracy_score(y_train, model.predict(X_train))
+    test_acc = accuracy_score(y_test, model.predict(X_test))
+    print(f"{name:15s} | Train: {train_acc:.3f} | Test: {test_acc:.3f}")

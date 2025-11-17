@@ -1,0 +1,22 @@
+# ============================================
+# CELL 3: ENGLISH TO GERMAN TRANSLATOR
+# ============================================
+!pip install -q gradio transformers
+
+import gradio as gr
+from transformers import pipeline
+
+translator = pipeline("translation_en_to_de", model="Helsinki-NLP/opus-mt-en-de")
+
+def translate_text(text):
+    translation = translator(text, max_length=512)
+    return translation[0]['translation_text']
+
+demo = gr.Interface(
+    fn=translate_text,
+    inputs=gr.Textbox(label="English text", lines=5, placeholder="Enter English text..."),
+    outputs=gr.Textbox(label="German translation", lines=5),
+    title="🌍 English → German Translator",
+    theme="default"
+)
+demo.launch(debug=True)

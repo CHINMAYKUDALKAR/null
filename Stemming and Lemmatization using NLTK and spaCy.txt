@@ -1,0 +1,33 @@
+!pip install nltk spacy
+!python -m spacy download en_core_web_sm
+
+import nltk
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+from nltk.corpus import wordnet
+
+nltk.download("punkt")
+nltk.download("wordnet")
+nltk.download("omw-1.4")
+
+text = """Natural Language Processing (NLP) is a fascinating field of Artificial Intelligence that focuses on the interaction between computers and human language. It involves many tasks such as text preprocessing, tokenization, stemming, lemmatization, stopword removal, and parsing. These steps are important because they help machines understand human communication more effectively. For example, words like “running”, “ran”, and “runs” all have the same base meaning, which is “run”. Stemming and lemmatization play a crucial role in bringing such words to their root or base form. This helps in building efficient search engines, chatbots, and recommendation systems. Without these preprocessing steps, machines may treat different forms of a word as completely separate, leading to errors in analysis. By normalizing words, NLP makes tasks like sentiment analysis, information retrieval, and machine translation much more accurate and meaningful."""
+
+words = word_tokenize(text.lower())
+
+stemmer = PorterStemmer()
+lemmatizer = WordNetLemmatizer()
+
+stems = [stemmer.stem(w) for w in words]
+lemmas = [lemmatizer.lemmatize(w) for w in words]
+
+print("NLTK Stemming:\n", stems[:50])
+print("\nNLTK Lemmatization:\n", lemmas[:50])
+
+import spacy
+
+nlp = spacy.load("en_core_web_sm")
+doc = nlp(text)
+
+lemmas_spacy = [token.lemma_ for token in doc if not token.is_punct]
+
+print("\nspaCy Lemmatization:\n", lemmas_spacy[:50])

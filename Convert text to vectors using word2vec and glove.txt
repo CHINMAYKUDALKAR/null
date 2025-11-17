@@ -1,0 +1,19 @@
+!pip install gensim
+!wget -q https://nlp.stanford.edu/data/glove.6B.zip
+!unzip -q glove.6B.zip
+
+# ---- Word2Vec ----
+from gensim.models import Word2Vec
+sentences = [["this","is","a","sample"],["word2vec","example"]]
+w2v = Word2Vec(sentences, vector_size=100, min_count=1)
+print("Word2Vec vector:", w2v.wv["sample"][:5])
+
+# ---- GloVe ----
+import numpy as np
+glove = {}
+with open("glove.6B.100d.txt", encoding="utf8") as f:
+    for line in f:
+        w, *vec = line.split()
+        glove[w] = np.asarray(vec, float)
+
+print("GloVe vector:", glove["sample"][:5])

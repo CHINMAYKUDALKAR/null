@@ -1,0 +1,28 @@
+!pip install numpy scikit-learn
+
+import os
+import numpy as np
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
+dataset_path = "/content/drive/MyDrive/data/IMDB movie review/IMDB Dataset.csv"
+texts = [open(os.path.join(dataset_path, f), encoding="utf-8").read()
+         for f in os.listdir(dataset_path) if f.endswith(".txt")]
+
+count = CountVectorizer()
+count_vectors = count.fit_transform(texts).toarray()
+print("\nCountVectorizer vectors:\n", count_vectors)
+
+tfidf = TfidfVectorizer()
+tfidf_vectors = tfidf.fit_transform(texts).toarray()
+print("\nTF-IDF vectors:\n", tfidf_vectors)
+
+glove_path = "/content/drive/MyDrive/data/GloVe/glove.6B.100d.txt"
+with open(glove_path, encoding="utf-8") as f:
+    embeddings = {p[0]: np.asarray(p[1:], dtype="float32") for p in map(str.split, f)}
+
+all_words = set(" ".join(texts).split())
+for word in all_words:
+    if word in embeddings:
+        print(f"\nEmbedding for '{word}':\n{embeddings[word]}")
+    else:
+        print(f"\nWord '{word}' not found in GloVe.")

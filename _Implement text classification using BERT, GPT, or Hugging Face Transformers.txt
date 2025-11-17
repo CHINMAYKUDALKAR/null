@@ -1,0 +1,51 @@
+!pip install torch pandas transformers
+
+import torch
+import os
+import pandas as pd
+import textwrap
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+paths = {
+    'BERT': '/content/drive/MyDrive/models/BERT',
+    'GPT': '/content/drive/MyDrive/models/GPT',
+    'RoBERTa': '/content/drive/MyDrive/models/RoBERTa'
+}
+
+models = {}
+tokenizers = {}
+
+for name, path in paths.items():
+    if os.path.exists(path):
+        tokenizers[name] = AutoTokenizer.from_pretrained(path)
+        models[name] = AutoModelForSequenceClassification.from_pretrained(path)
+        print(f"✅ {name} loaded from Drive")
+
+if 'GPT' in tokenizers:
+    tokenizers['GPT'].pad_token = tokenizers['GPT'].eos_token
+
+def predict_all(text):
+    results = {}
+    for name in models:
+        inputs = tokenizers[name](text, return_tensors="pt", truncation=True, padding=True)
+        with torch.no_grad():
+            outputs = models[name](**inputs)
+            pred = torch.argmax(outputs.logits).item()
+            results[name] = 'Positive' if pred == 1 else 'Negative'
+    return results
+
+data_path = '/content/drive/MyDrive/data/amazonProductReviews/Reviews.csv'
+df = pd.read_csv(data_path, engine='python', on_bad_lines='skip')
+
+test_texts = df['Text'].dropna().head(10).tolist()
+
+print("\n🎯 PREDICTIONS ON AMAZON REVIEWS:\n")
+
+for text in test_texts:
+    wrapped_text = textwrap.fill(text, width=80)
+    print("Text:")
+    print(wrapped_text + "\n")
+    predictions = predict_all(text)
+    for model, result in predictions.items():
+        print(f"{model.ljust(8)} : {result}")
+    print("-" * 80)
